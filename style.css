@@ -60,3 +60,22 @@ html, body {
   width: 86.5px;
   pointer-events: none;
 }
+
+.endcard {
+  position: absolute;
+  inset: 0;
+  background: #0a1e49;
+}
+
+.card {
+  position: absolute;
+  left: 0;
+  top: calc(var(--extra, 0px) / 2);
+  width: 360px;
+  height: 640px;
+}
+
+.btn {
+  position: absolute;
+  cursor: pointer;
+}

@@ -3,6 +3,7 @@ const gesture = document.getElementById('gesture');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const debug = location.search.includes('debug');
+const clickTag = window.clickTag || 'https://example.com/landing';
 
 function fit() {
   const w = window.innerWidth;
@@ -51,7 +52,7 @@ const JUMP = -760;
 const GUT_END = 5056 - 720;
 
 let state = 'start';
-let gutX, y, vy, last;
+let gutX, y, vy, last, endTl;
 
 function reset() {
   gutX = 0;
@@ -62,7 +63,8 @@ function reset() {
 function tap() {
   if (state === 'start') {
     state = 'play';
-    gesture.hidden = true;
+    gsap.killTweensOf(gesture);
+    gsap.to(gesture, { autoAlpha: 0, scale: 0.6, duration: 0.25 });
     last = performance.now();
     requestAnimationFrame(loop);
   } else if (state === 'play') {
@@ -110,7 +112,46 @@ function hits(o) {
 function end(result) {
   state = result;
   draw();
-  console.log(result);
+
+  const card = document.getElementById(result);
+  const q = gsap.utils.selector(card);
+  card.hidden = false;
+
+  endTl = gsap.timeline({ delay: result === 'fail' ? 0.5 : 0.2 })
+    .from(card, { autoAlpha: 0, duration: 0.4 })
+    .from(q('.layer')[0], { scale: 0.6, autoAlpha: 0, duration: 0.6, ease: 'back.out(1.6)' }, '-=0.2');
+
+  if (result === 'fail') {
+    endTl
+      .from(q('.poo'), { y: -60, autoAlpha: 0, duration: 0.8, ease: 'bounce.out' }, '-=0.3')
+      .from(q('.bac'), { scale: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.08 }, '-=0.5');
+  } else {
+    endTl
+      .from(q('.confetti'), { scale: 0.2, rotation: -20, autoAlpha: 0, duration: 0.9, ease: 'expo.out' }, '-=0.3')
+      .from(q('.poo'), { y: 80, autoAlpha: 0, duration: 0.8, ease: 'back.out(2)' }, '-=0.7');
+  }
+
+  endTl
+    .from(q('.hl'), { y: 20, autoAlpha: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3')
+    .from(q('.btn'), { scale: 0.8, autoAlpha: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.12 }, '-=0.2')
+    .to(q('.cta'), { scale: 1.05, duration: 0.6, ease: 'sine.inOut', yoyo: true, repeat: 7 });
+}
+
+function replay() {
+  endTl.kill();
+  for (const card of document.querySelectorAll('.endcard')) {
+    card.hidden = true;
+    gsap.set([card, ...card.querySelectorAll('img')], { clearProps: 'transform,opacity,visibility' });
+  }
+  reset();
+  draw();
+  state = 'start';
+  intro();
+}
+
+function intro() {
+  gsap.fromTo(gesture, { autoAlpha: 0, scale: 0.6 }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', delay: 0.6 });
+  gsap.to(gesture, { y: 8, duration: 0.5, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.1 });
 }
 
 function draw() {
@@ -144,4 +185,12 @@ function draw() {
 
 reset();
 Promise.all([gut, player, ...level.map(o => o.img)].map(img => img.decode())).then(draw);
+
+gsap.from('#headline', { y: -30, autoAlpha: 0, duration: 0.7, ease: 'power3.out' });
+intro();
+
 ad.addEventListener('pointerdown', tap);
+for (const cta of document.querySelectorAll('.cta')) {
+  cta.addEventListener('click', () => window.open(clickTag, '_blank'));
+}
+document.querySelector('.replay').addEventListener('click', replay);

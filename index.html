@@ -15,12 +15,38 @@
       <img class="layer" src="assets/border.png" alt="">
     </div>
 
-    <img class="layer" src="assets/logo.png" alt="">
-
     <img class="layer" id="headline" src="assets/game/tut.png" alt="Bringe Poo durch den Darm ans Ziel.">
     <img id="gesture" src="assets/gesture.png" alt="tap to run">
+
+    <div class="endcard" id="fail" hidden>
+      <div class="card">
+        <img class="layer" src="assets/endcard/fail/bubble.png" alt="" style="transform-origin: 180px 235px">
+        <img class="layer bac" src="assets/endcard/fail/bac1.png" alt="" style="transform-origin: 144px 133px">
+        <img class="layer bac" src="assets/endcard/fail/bac2.png" alt="" style="transform-origin: 258px 215px">
+        <img class="layer bac" src="assets/endcard/fail/bac3.png" alt="" style="transform-origin: 87px 231px">
+        <img class="layer bac" src="assets/endcard/fail/bac4.png" alt="" style="transform-origin: 94px 148px">
+        <img class="layer bac" src="assets/endcard/fail/bac5.png" alt="" style="transform-origin: 221px 155px">
+        <img class="layer poo" src="assets/endcard/fail/sad.png" alt="" style="transform-origin: 180px 300px">
+        <img class="layer hl" src="assets/endcard/fail/hl.png" alt="Poo, das tat weh! Erfahre jetzt, was deinem Darm guttut.">
+        <img class="btn cta" src="assets/endcard/fail/cta.png" alt="Jetzt informieren!" style="left: 37px; top: 482.5px; width: 186px">
+        <img class="btn replay" src="assets/endcard/fail/replay.png" alt="Nochmal spielen" style="left: 37px; top: 538.5px; width: 185.5px">
+      </div>
+    </div>
+
+    <div class="endcard" id="win" hidden>
+      <div class="card">
+        <img class="layer" src="assets/endcard/win/bubble.png" alt="" style="transform-origin: 180px 245px">
+        <img class="layer confetti" src="assets/endcard/win/konfetti.png" alt="" style="transform-origin: 30px 110px">
+        <img class="layer poo" src="assets/endcard/win/happy.png" alt="" style="transform-origin: 180px 406px">
+        <img class="layer hl" src="assets/endcard/win/hl.png" alt="Poo, tut das gut! Wenn du weißt, was dein Darm braucht.">
+        <img class="btn cta" src="assets/endcard/win/cta.png" alt="Jetzt mehr erfahren" style="left: 28px; top: 560px; width: 214px">
+      </div>
+    </div>
+
+    <img class="layer" src="assets/logo.png" alt="">
   </div>
 
+  <script src="lib/gsap.min.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
