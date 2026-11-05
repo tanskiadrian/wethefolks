@@ -26,4 +26,24 @@
 
 ## Fireplace
 
-todo
+## Fireplace
+
+- three html files sharing one style.css and one fireplace.js, the part is picked by body id
+- background is bg-big.jpg in all three parts, shifted by the part position (left 0, top -324, right -1360)
+- the pre cut bg.jpg files dont line up at the seams (rock in top ends next to moss in right), bg-big does
+- 4px gap between parts because bg-big is 1680 wide and the parts are 1672
+- zoom origin is the center of the whole fireplace (840 487.5) in every part so seams stay together while zooming
+- per part bg.jpg not shipped, only bg-big
+- hl.png and box.png have black instead of alpha, hl uses mix-blend-mode screen, box is clip-path to the blue rect and 85% opacity
+- no edits to the png files themselves
+- top headline is one png shown three times with clip-path per line so it builds line by line
+- top asset has no NATÜRLICH like in layout.png, used the asset as is
+- product is baked into the background so it zooms with it, no separate slide in
+- cta position measured from layout.png (screenshot at about 0.973 scale), centered, top 837
+- intro about 3.7s, then bg breathes and cta pulses for about 30s and stops
+- preview.html waits for all iframes to load and sends start with postMessage, each part also starts by itself after 3s or on load when opened alone
+- prefers-reduced-motion shows the final state, no tweens
+- debug=1 puts layout.jpg at 50% over each part, works on preview too
+- click anywhere on a part opens clickTag
+- whole fireplace around 2.6 MB with gsap and the debug layout
+- ad assets not compressed, only layout.png saved as jpg for the debug overlay (1.7 MB to 280 KB)
