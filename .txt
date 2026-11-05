@@ -1,1 +1,4 @@
 https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js
+
+ffmpeg -i crash.mp3 -ac 1 -b:a 64k crash-new.mp3
+ffmpeg -i applause.mp3 -t 4.5 -af "afade=t=out:st=3:d=1.5" -ac 1 -b:a 64k applause-new.mp3

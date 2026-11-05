@@ -4,6 +4,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const debug = location.search.includes('debug');
 const clickTag = window.clickTag || 'https://example.com/landing';
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function fit() {
   const w = window.innerWidth;
@@ -43,6 +44,39 @@ const level = [
   ['txt9', 4040, 470],
 ].map(([name, x, y]) => ({ img: load(`game/${name}.png`), x, y }));
 
+const audio = new AudioContext();
+const out = audio.createGain();
+out.connect(audio.destination);
+
+const sounds = {};
+for (const name of ['loop', 'crash', 'fail', 'cheer', 'applause']) {
+  fetch(`assets/audio/${name}.mp3`)
+    .then(res => res.arrayBuffer())
+    .then(data => audio.decodeAudioData(data))
+    .then(buffer => {
+      sounds[name] = buffer;
+      if (name === 'loop' && state === 'play') play('loop', true);
+    });
+}
+
+const playing = new Set();
+
+function play(name, loop = false) {
+  if (!sounds[name]) return;
+  const src = audio.createBufferSource();
+  src.buffer = sounds[name];
+  src.loop = loop;
+  src.connect(out);
+  src.onended = () => playing.delete(src);
+  src.start();
+  playing.add(src);
+}
+
+function stopAll() {
+  for (const src of playing) src.stop();
+  playing.clear();
+}
+
 const PLAYER_X = 111;
 const R = 34;
 const TOP = 400;
@@ -61,7 +95,9 @@ function reset() {
 }
 
 function tap() {
-  if (state === 'start') {
+  if (state === 'start' || state === 'paused') {
+    if (state === 'start') play('loop', true);
+    audio.resume();
     state = 'play';
     gsap.killTweensOf(gesture);
     gsap.to(gesture, { autoAlpha: 0, scale: 0.6, duration: 0.25 });
@@ -112,12 +148,15 @@ function hits(o) {
 function end(result) {
   state = result;
   draw();
+  stopAll();
+  if (result === 'fail') play('crash');
 
   const card = document.getElementById(result);
   const q = gsap.utils.selector(card);
   card.hidden = false;
 
   endTl = gsap.timeline({ delay: result === 'fail' ? 0.5 : 0.2 })
+    .call(() => result === 'fail' ? play('fail') : (play('cheer'), play('applause')))
     .from(card, { autoAlpha: 0, duration: 0.4 })
     .from(q('.layer')[0], { scale: 0.6, autoAlpha: 0, duration: 0.6, ease: 'back.out(1.6)' }, '-=0.2');
 
@@ -135,10 +174,13 @@ function end(result) {
     .from(q('.hl'), { y: 20, autoAlpha: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3')
     .from(q('.btn'), { scale: 0.8, autoAlpha: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.12 }, '-=0.2')
     .to(q('.cta'), { scale: 1.05, duration: 0.6, ease: 'sine.inOut', yoyo: true, repeat: 7 });
+
+  if (calm) endTl.progress(1);
 }
 
 function replay() {
   endTl.kill();
+  stopAll();
   for (const card of document.querySelectorAll('.endcard')) {
     card.hidden = true;
     gsap.set([card, ...card.querySelectorAll('img')], { clearProps: 'transform,opacity,visibility' });
@@ -150,6 +192,7 @@ function replay() {
 }
 
 function intro() {
+  if (calm) return;
   gsap.fromTo(gesture, { autoAlpha: 0, scale: 0.6 }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', delay: 0.6 });
   gsap.to(gesture, { y: 8, duration: 0.5, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.1 });
 }
@@ -184,13 +227,38 @@ function draw() {
 }
 
 reset();
-Promise.all([gut, player, ...level.map(o => o.img)].map(img => img.decode())).then(draw);
 
-gsap.from('#headline', { y: -30, autoAlpha: 0, duration: 0.7, ease: 'power3.out' });
-intro();
+window.addEventListener('load', () => {
+  draw();
+  ad.style.visibility = 'visible';
+  if (!calm) gsap.from('#headline', { y: -30, autoAlpha: 0, duration: 0.7, ease: 'power3.out' });
+  intro();
+});
 
 ad.addEventListener('pointerdown', tap);
 for (const cta of document.querySelectorAll('.cta')) {
   cta.addEventListener('click', () => window.open(clickTag, '_blank'));
 }
 document.querySelector('.replay').addEventListener('click', replay);
+
+const mute = document.getElementById('mute');
+mute.addEventListener('pointerdown', e => e.stopPropagation());
+mute.addEventListener('click', () => {
+  const muted = mute.classList.toggle('muted');
+  out.gain.value = muted ? 0 : 1;
+  mute.setAttribute('aria-label', muted ? 'Ton an' : 'Ton aus');
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    audio.suspend();
+    gsap.globalTimeline.pause();
+    if (state === 'play') {
+      state = 'paused';
+      gsap.to(gesture, { autoAlpha: 1, scale: 1, duration: 0.3 });
+    }
+  } else {
+    gsap.globalTimeline.resume();
+    if (state !== 'paused') audio.resume();
+  }
+});
