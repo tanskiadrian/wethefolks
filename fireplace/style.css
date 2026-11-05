@@ -13,6 +13,7 @@ html, body {
 #ad {
   position: relative;
   overflow: hidden;
+  visibility: hidden;
 }
 
 #ad img {

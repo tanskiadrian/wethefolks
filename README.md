@@ -1,6 +1,6 @@
 # We The Folks take-home
 
-`game/` is the Gut Run game (variant A), `fireplace/` is the fireplace skin (variant B). No build step, GSAP is the only library.
+`/` is the Gut Run game (variant A), `fireplace/` is the fireplace skin (variant B). No build step, GSAP is the only library.
 
     npx serve .
 
