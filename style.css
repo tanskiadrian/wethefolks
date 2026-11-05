@@ -10,12 +10,6 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/*
-  Design is 360x640. game.js sets:
-  --s      scale, so 360px fills the screen width
-  --extra  how much taller than 640 the phone is (in design px)
-  Extra height goes into the navy headline band, the gut keeps its size.
-*/
 #ad {
   position: absolute;
   left: 50%;
@@ -45,7 +39,6 @@ html, body {
   pointer-events: none;
 }
 
-/* the gut strip starts above the pink border - hide that part, like in the design */
 #world::after {
   content: '';
   position: absolute;
