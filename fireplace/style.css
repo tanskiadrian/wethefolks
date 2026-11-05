@@ -57,3 +57,8 @@ html, body {
 #l3 {
   clip-path: inset(152.5px 0 0 0);
 }
+
+#ad #debug {
+  opacity: 0.5;
+  pointer-events: none;
+}

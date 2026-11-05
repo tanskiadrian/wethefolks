@@ -1,4 +1,5 @@
 const clickTag = window.clickTag || 'https://example.com/landing';
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const ad = document.getElementById('ad');
 const bg = document.getElementById('bg');
@@ -12,10 +13,35 @@ document.body.addEventListener('click', () => {
   window.open(clickTag, '_blank');
 });
 
+if (location.search.includes('debug')) {
+  const frames = {
+    left: [28, 50, 311, 949],
+    top: [345, 49, 1002, 246],
+    right: [1353, 50, 310, 949],
+  };
+  const [x, y, w, h] = frames[document.body.id];
+  const sx = ad.offsetWidth / w;
+  const sy = ad.offsetHeight / h;
+  const img = document.createElement('img');
+  img.id = 'debug';
+  img.src = 'design/layout.jpg';
+  img.style.left = -x * sx + 'px';
+  img.style.top = -y * sy + 'px';
+  img.style.width = 1684 * sx + 'px';
+  img.style.height = 1018 * sy + 'px';
+  ad.appendChild(img);
+}
+
+let started = false;
+
 function start() {
+  if (started) return;
+  started = true;
   ad.style.visibility = 'visible';
 
-  const tl = gsap.timeline();
+  if (calm) return;
+
+  const tl = gsap.timeline({ onComplete: idle });
 
   tl.from(bg, { scale: 1.15, duration: 5, ease: 'power2.out' }, 0);
 
@@ -34,4 +60,20 @@ function start() {
   }
 }
 
-window.addEventListener('load', start);
+function idle() {
+  gsap.to(bg, { scale: 1.04, duration: 5, ease: 'sine.inOut', yoyo: true, repeat: 5 });
+
+  if (cta) {
+    const pulse = gsap.timeline({ repeat: 9, repeatDelay: 2.2 });
+    pulse.to(cta, { scale: 1.07, duration: 0.4, ease: 'sine.inOut', yoyo: true, repeat: 1 });
+  }
+}
+
+if (window.parent !== window) {
+  window.addEventListener('message', (e) => {
+    if (e.data === 'start') start();
+  });
+  setTimeout(start, 3000);
+} else {
+  window.addEventListener('load', start);
+}

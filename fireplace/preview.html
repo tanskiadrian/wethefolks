@@ -69,6 +69,22 @@
     }
     window.addEventListener('resize', fit);
     fit();
+
+    if (location.search) {
+      frames.forEach((f) => {
+        f.src = f.getAttribute('src') + location.search;
+      });
+    }
+
+    let loaded = 0;
+    frames.forEach((f) => {
+      f.addEventListener('load', () => {
+        loaded++;
+        if (loaded === frames.length) {
+          frames.forEach((f) => f.contentWindow.postMessage('start', '*'));
+        }
+      });
+    });
   </script>
 </body>
 </html>
